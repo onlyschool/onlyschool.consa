@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>НМТ — Особистий Дашборд</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F9FAFB; scroll-behavior: smooth; }
+::selection { background: #EAF1FE; color: #1A4FC4; }
+
+/* ── Bento-box Container ── */
+.slide { max-width: 1100px; margin: 0 auto 40px; }
+
+.bento-card {
+  background: #ffffff;
+  border: 1px solid #F3F4F6;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bento-card.clickable { cursor: pointer; }
+.bento-card.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+  border-color: #E5E7EB;
+}
+
+/* ── Segmented Nav (iOS style) ── */
+.nav-tabs { display:flex; gap:4px; margin-bottom:28px; background:#F3F4F6; border-radius:1rem; padding:6px; max-width: 100%; overflow-x: auto;}
+.nav-tab {
+  flex:1 1 auto; padding:12px 20px; border-radius:0.75rem; border:none; background:transparent;
+  font-size:14.5px; font-weight:600; color:#6B7280; cursor:pointer; transition:all .2s ease; white-space:nowrap; text-align: center;
+}
+.nav-tab:hover:not(.active) { color:#111827; background: rgba(255,255,255,0.4); }
+.nav-tab.active { background:#fff; color:#111827; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+
+/* ── Interactive Level Meter (0-10) ── */
+.level-squares { display:flex; gap:4px; height: 32px; align-items: flex-end; width: 100%; }
+.level-square { flex:1; height: 14px; border-radius: 4px; background:#E5E7EB; cursor:pointer; transition:all .2s cubic-bezier(0.4, 0, 0.2, 1); }
+.level-square:hover { height: 32px !important; background: #D1D5DB; }
+.level-square.filled { height: 32px; background:var(--acc); opacity: 0.85; }
+.level-square.filled:hover { opacity: 1; transform:scaleY(1.05); }
+
+/* ── Quiz Options ── */
+.quiz-option { 
+    display:flex; align-items:center; gap:16px; padding:16px; 
+    border-radius:1rem; border:2px solid #F3F4F6; cursor:pointer; 
+    transition:all .2s ease; background:#fff; 
+}
+.quiz-option:hover:not(.locked) { border-color:#BFD4FB; background:#F5F9FF; }
+.quiz-option.selected { border-color:#2F6FED; background:#EAF1FE; transform:scale(1.01); box-shadow: 0 4px 12px rgba(47,111,237,0.1); }
+.quiz-option.correct { border-color:#34D07A; background:#F0FDF4; }
+.quiz-option.wrong { border-color:#F87171; background:#FEF2F2; }
+.quiz-option.show-correct { border-color:#34D07A; background:#F0FDF4; opacity: 0.8; }
+
+.opt-letter { 
+    width:34px; height:34px; border-radius:8px; background:#F3F4F6; 
+    display:flex; align-items:center; justify-content:center; 
+    font-size:14px; font-weight:700; color:#6B7280; flex-shrink:0; transition:all .2s ease; 
+}
+.quiz-option.selected .opt-letter { background:#2F6FED; color:#fff; }
+.quiz-option.correct .opt-letter, .quiz-option.show-correct .opt-letter { background:#34D07A; color:#fff; }
+.quiz-option.wrong .opt-letter { background:#EF4444; color:#fff; }
+.opt-text { font-size:15px; font-weight:600; color:#374151; }
+
+.quiz-feedback { margin-top:20px; padding:20px; border-radius:1rem; border:2px solid; display:flex; gap:16px; align-items:flex-start; animation: fadeIn 0.4s ease-out;}
+.correct-fb { background:#F0FDF4; border-color:#BBF7D0; }
+.wrong-fb { background:#FEF2F2; border-color:#FECACA; }
+.fb-icon { font-size:24px; flex-shrink:0; line-height:1; }
+.fb-text { font-size:14.5px; line-height:1.6; color:#1F2937; }
+.fb-text strong { display:block; margin-bottom:4px; font-size:16px; font-weight:800; color: #111827; }
+.fb-text strong.inline-strong { display: inline; font-size: inherit; font-weight: 700; color: inherit; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ── PDF export template (hidden off-screen, rendered by html2pdf.js) ── */
+#pdf-export-root{
+  position:absolute; top:0; left:-99999px; width:900px; background:#fff;
+  font-family:'Segoe UI', Arial, sans-serif; color:#0B1424;
+}
+#pdf-export-root *{box-sizing:border-box;}
+#pdf-export-root .pdf-top-gradient{ height:8px; width:100%; background:linear-gradient(90deg,#2F6FED,#8A4FE0,#E8177D); }
+#pdf-export-root .pdf-inner{ padding:32px 44px 0 44px; }
+#pdf-export-root h1{ font-size:26px; letter-spacing:.5px; margin:20px 0 6px 0; text-transform:uppercase; font-weight:800; }
+#pdf-export-root .pdf-pib{ font-size:15px; margin-bottom:26px; }
+#pdf-export-root .pdf-pib .pdf-line{ display:inline-block; min-width:260px; border-bottom:1px solid #333; padding-bottom:2px; }
+#pdf-export-root .pdf-section-label{ font-size:12px; letter-spacing:1.5px; font-weight:700; color:#8A8F98; text-transform:uppercase; margin:26px 0 14px 0; }
+#pdf-export-root .pdf-scores-box{ background:#EFF2F8; border-radius:16px; padding:28px 20px 18px 20px; display:flex; justify-content:space-around; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+#pdf-export-root .pdf-score-item{ text-align:center; min-width:120px; }
+#pdf-export-root .pdf-bars{ display:flex; align-items:flex-end; justify-content:center; gap:10px; height:170px; }
+#pdf-export-root .pdf-bar{ width:34px; border-radius:8px 8px 0 0; position:relative; display:flex; align-items:flex-start; justify-content:center; }
+#pdf-export-root .pdf-bar .pdf-val{ position:absolute; top:-24px; font-weight:800; font-size:15px; white-space:nowrap; }
+#pdf-export-root .pdf-subject-name{ margin-top:12px; font-weight:700; font-size:13px; }
+#pdf-export-root .pdf-legend{ display:flex; gap:22px; align-items:center; margin:14px 0 6px 4px; font-size:13px; color:#6B7280; }
+#pdf-export-root .pdf-legend .pdf-dot{ width:11px; height:11px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle; }
+#pdf-export-root .pdf-legend .pdf-dot.light{ background:#D7DCE5; }
+#pdf-export-root .pdf-legend .pdf-dot.dark{ background:#0B1424; }
+#pdf-export-root .pdf-banner-pink{ background:#E8177D; color:#fff; text-align:center; font-weight:800; letter-spacing:.5px; padding:14px; border-radius:10px; margin:22px 0 26px 0; text-transform:uppercase; font-size:14px; }
+#pdf-export-root .pdf-topics-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px; }
+#pdf-export-root .pdf-topic-card{ background:#EFF2F8; border-radius:12px; padding:16px 14px; min-height:60px; }
+#pdf-export-root .pdf-topic-card .pdf-subj{ font-weight:800; font-size:12.5px; margin-bottom:10px; text-transform:uppercase; }
+#pdf-export-root .pdf-topic-row{ display:flex; align-items:center; gap:8px; font-size:12.5px; margin-bottom:8px; }
+#pdf-export-root .pdf-topic-num{ width:18px; height:18px; border-radius:5px; border:1px solid; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+#pdf-export-root .pdf-empty-topics{ font-size:12px; color:#9AA0AA; font-style:italic; }
+#pdf-export-root .pdf-banner-dark{ background:#0B1424; color:#fff; text-align:center; font-weight:800; letter-spacing:.5px; padding:16px; border-radius:10px; margin-bottom:10px; text-transform:uppercase; font-size:14px; }
+
+#pdf-export-root .pdf-pricing-wrap{ background:#EFF2F8; padding:40px 44px; }
+#pdf-export-root .pdf-pricing-title{ text-align:center; font-size:19px; font-weight:800; text-transform:uppercase; margin-bottom:26px; letter-spacing:.5px; }
+#pdf-export-root .pdf-plans{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; align-items:start; }
+#pdf-export-root .pdf-plan{ background:#fff; border-radius:18px; padding:26px 20px; position:relative; border:2px solid transparent; }
+#pdf-export-root .pdf-plan.featured{ border-color:#FF7A30; padding-top:34px; }
+#pdf-export-root .pdf-badge{ position:absolute; top:-14px; left:50%; transform:translateX(-50%); background:#FFDDBE; color:#FF7A30; font-weight:800; font-size:11px; text-transform:uppercase; padding:6px 14px; border-radius:20px; white-space:nowrap; }
+#pdf-export-root .pdf-plan-icon{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto; font-size:19px; color:#fff; }
+#pdf-export-root .pdf-plan-name{ text-align:center; font-size:18px; font-weight:900; letter-spacing:.5px; margin-bottom:14px; }
+#pdf-export-root .pdf-plan.basic .pdf-plan-icon{ background:#2F6FED; }
+#pdf-export-root .pdf-plan.featured .pdf-plan-icon{ background:#FF7A30; }
+#pdf-export-root .pdf-plan.mentor .pdf-plan-icon{ background:#2F6FED; }
+#pdf-export-root .pdf-plan.basic .pdf-plan-name{ color:#2F6FED; }
+#pdf-export-root .pdf-plan.featured .pdf-plan-name{ color:#FF7A30; }
+#pdf-export-root .pdf-plan.mentor .pdf-plan-name{ color:#2F6FED; }
+#pdf-export-root .pdf-includes{ text-align:center; font-size:10.5px; font-weight:800; text-transform:uppercase; border-radius:20px; padding:7px 10px; margin-bottom:14px; }
+#pdf-export-root .pdf-plan.featured .pdf-includes{ background:#FF7A30; color:#fff; }
+#pdf-export-root .pdf-plan.mentor .pdf-includes{ background:#2F6FED; color:#fff; }
+#pdf-export-root .pdf-feat-list{ list-style:none; margin:0 0 18px 0; padding:0; }
+#pdf-export-root .pdf-feat-list li{ font-size:11.5px; line-height:1.5; padding-left:16px; position:relative; margin-bottom:9px; color:#222; }
+#pdf-export-root .pdf-feat-list li::before{ content:"•"; position:absolute; left:0; font-weight:900; }
+#pdf-export-root .pdf-plan.basic .pdf-feat-list li::before{ color:#2F6FED; }
+#pdf-export-root .pdf-plan.featured .pdf-feat-list li::before{ color:#FF7A30; }
+#pdf-export-root .pdf-plan.mentor .pdf-feat-list li::before{ color:#2F6FED; }
+#pdf-export-root .pdf-price-block{ border-top:1px solid #EAEAEA; padding-top:12px; }
+#pdf-export-root .pdf-price-row{ font-size:11px; color:#6B7280; margin-bottom:2px; }
+#pdf-export-root .pdf-price-now{ font-size:21px; font-weight:900; }
+#pdf-export-root .pdf-price-now .pdf-cur{ font-size:11px; font-weight:700; }
+#pdf-export-root .pdf-price-old{ font-size:12.5px; color:#B7BCC6; text-decoration:line-through; margin-left:6px; }
+#pdf-export-root .pdf-plan.basic .pdf-price-now, #pdf-export-root .pdf-plan.mentor .pdf-price-now{ color:#2F6FED; }
+#pdf-export-root .pdf-plan.featured .pdf-price-now{ color:#FF7A30; }
+
+#pdf-export-root .pdf-info-row{ display:flex; gap:16px; margin-top:18px; }
+#pdf-export-root .pdf-info-card{ flex:1; background:#fff; border-radius:14px; padding:16px 18px; display:flex; align-items:center; gap:14px; font-size:12.5px; font-weight:600; }
+#pdf-export-root .pdf-info-num{ width:32px; height:32px; min-width:32px; border-radius:9px; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:14px; }
+#pdf-export-root .pdf-info-card:nth-child(1) .pdf-info-num{ background:#2F6FED; }
+#pdf-export-root .pdf-info-card:nth-child(2) .pdf-info-num{ background:#FF7A30; }
+#pdf-export-root .pdf-info-bar-dark{ margin-top:14px; background:#2F6FED; color:#fff; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+#pdf-export-root .pdf-info-bar-dark .pdf-info-num{ background:rgba(255,255,255,.18); }
+#pdf-export-root .pdf-info-bar-dark .pdf-title-strong{ font-weight:900; font-size:13px; text-transform:uppercase; }
+#pdf-export-root .pdf-info-bar-dark .pdf-sub{ font-size:11.5px; opacity:.9; }
+#pdf-export-root .pdf-pill{ background:#fff; color:#0B1424; font-weight:800; font-size:11.5px; border-radius:20px; padding:9px 16px; margin-left:auto; }
+</style>
+</head>
+<body class="pb-20">
+
+<div class="h-1.5 w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+
+<div class="pt-10 px-5">
+
+  <header class="max-w-[1100px] mx-auto mb-10 flex flex-col md:flex-row md:items-start justify-between gap-6 px-2">
+      <div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 uppercase leading-tight">Особиста стратегія<br>підготовки до НМТ</h1>
+          <p class="text-gray-500 font-medium text-lg">Встановіть поточний рівень та омріяні бали</p>
+      </div>
+      
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-3">
+          <div class="flex flex-col gap-1 w-full sm:w-48">
+              <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1">Ім'я та Прізвище</label>
+              <input type="text" id="pib-input" placeholder="Введіть дані..." class="text-sm font-semibold bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all">
+          </div>
+          <button id="export-pdf-btn" onclick="exportPdf()" class="w-full sm:w-auto bg-gray-900 hover:bg-black text-white font-bold text-sm rounded-xl px-6 py-3 transition-all mt-4 sm:mt-0 h-[42px] flex items-center justify-center gap-2">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="12" y2="11"/></svg>
+              PDF Звіт
+          </button>
+      </div>
+  </header>
+
+  <div class="slide">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+      <div class="bento-card clickable p-6" style="--acc:#2F6FED" onclick="scrollToQuiz('math')">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-extrabold text-xl">∑</div>
+              Математика
+          </h3>
+          <span class="py-1 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500">Обов'язковий</span>
+        </div>
+
+        <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100" onclick="event.stopPropagation()">
+          <div class="flex items-baseline justify-between mb-3">
+            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Твій рівень (0-10)</span>
+            <span class="text-xl font-extrabold text-blue-600" id="math-level-val">5</span>
+          </div>
+          <div class="level-squares" id="math-level-squares" data-subject="math"></div>
+          <input type="hidden" id="math-level" value="5">
+        </div>
+
+        <div class="flex gap-4" onclick="event.stopPropagation()">
+          <div class="flex-1 bg-white rounded-2xl p-4 border border-gray-200">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Зараз</label>
+            <div class="flex items-end gap-1.5">
+              <span class="text-3xl font-extrabold text-gray-900" id="math-approx">150</span>
+              <span class="text-gray-400 font-medium text-sm pb-1">/200</span>
+            </div>
+          </div>
+          <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#F0F5FF; border-color:#BFD4FB; ring-color:#EAF1FE;">
+            <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#6B93F2">Ціль</label>
+            <div class="flex items-end gap-1.5">
+              <input type="number" value="185" min="100" max="200" id="math-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#2F6FED">
+              <span class="font-medium text-sm pb-1" style="color:#8EADF5">/200</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bento-card clickable p-6" style="--acc:#E0703A" onclick="scrollToQuiz('hist')">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-extrabold text-xl">🏛</div>
+              Історія
+          </h3>
+          <span class="py-1 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500">Обов'язковий</span>
+        </div>
+
+        <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100" onclick="event.stopPropagation()">
+          <div class="flex items-baseline justify-between mb-3">
+            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Твій рівень (0-10)</span>
+            <span class="text-xl font-extrabold text-orange-600" id="history-level-val">5</span>
+          </div>
+          <div class="level-squares" id="history-level-squares" data-subject="history"></div>
+          <input type="hidden" id="history-level" value="5">
+        </div>
+
+        <div class="flex gap-4" onclick="event.stopPropagation()">
+          <div class="flex-1 bg-white rounded-2xl p-4 border border-gray-200">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Зараз</label>
+            <div class="flex items-end gap-1.5"><span class="text-3xl font-extrabold text-gray-900" id="history-approx">150</span><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
+          </div>
+          <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#FFF5F0; border-color:#FED7AA; ring-color:#FFEDD5;">
+            <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#F97316">Ціль</label>
+            <div class="flex items-end gap-1.5"><input type="number" value="180" min="100" max="200" id="history-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#EA580C"><span class="font-medium text-sm pb-1" style="color:#FDBA74">/200</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bento-card clickable p-6" style="--acc:#16A34A" onclick="scrollToQuiz('ukr')">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center font-extrabold text-xl">ꑭ</div>
+              Українська
+          </h3>
+          <span class="py-1 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500">Обов'язковий</span>
+        </div>
+
+        <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100" onclick="event.stopPropagation()">
+          <div class="flex items-baseline justify-between mb-3">
+            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Твій рівень (0-10)</span>
+            <span class="text-xl font-extrabold text-green-600" id="ukr2-level-val">5</span>
+          </div>
+          <div class="level-squares" id="ukr2-level-squares" data-subject="ukr2"></div>
+          <input type="hidden" id="ukr2-level" value="5">
+        </div>
+
+        <div class="flex gap-4" onclick="event.stopPropagation()">
+          <div class="flex-1 bg-white rounded-2xl p-4 border border-gray-200">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Зараз</label>
+            <div class="flex items-end gap-1.5"><span class="text-3xl font-extrabold text-gray-900" id="ukr2-approx">150</span><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
+          </div>
+          <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#F0FDF4; border-color:#BBF7D0; ring-color:#DCFCE7;">
+            <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#22C55E">Ціль</label>
+            <div class="flex items-end gap-1.5"><input type="number" value="195" min="100" max="200" id="ukr2-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#16A34A"><span class="font-medium text-sm pb-1" style="color:#86EFAC">/200</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bento-card clickable p-6 flex flex-col justify-between" style="--acc:#DB2777" onclick="scrollToQuiz('extra')">
+        <div>
+          <div class="flex items-center justify-between mb-6 gap-3 border-b border-gray-100 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center font-extrabold text-xl">💡</div>
+                <select id="extra-pick" onchange="syncExtraSubject(); updateScores();" onclick="event.stopPropagation()" class="text-xl font-bold text-gray-900 bg-transparent border-none p-0 pr-6 outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23DB2777%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_0_center]">
+                  <option value="bio">Біологія</option>
+                  <option value="lit">Укр. література</option>
+                  <option value="eng">Англійська мова</option>
+                  <option value="geo">Географія</option>
+                  <option value="fiz">Фізика</option>
+                  <option value="chem">Хімія</option>
+                  <option value="other_lang">Інша іноз. мова</option>
+                </select>
+            </div>
+            <span class="py-1 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider bg-pink-50 text-pink-600 whitespace-nowrap">На вибір</span>
+          </div>
+
+          <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100" onclick="event.stopPropagation()">
+            <div class="flex items-baseline justify-between mb-3">
+              <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Твій рівень (0-10)</span>
+              <span class="text-xl font-extrabold text-pink-600" id="extra-level-val">5</span>
+            </div>
+            <div class="level-squares" id="extra-level-squares" data-subject="extra"></div>
+            <input type="hidden" id="extra-level" value="5">
+          </div>
+
+          <div class="flex gap-4" onclick="event.stopPropagation()">
+            <div class="flex-1 bg-white rounded-2xl p-4 border border-gray-200">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Зараз</label>
+              <div class="flex items-end gap-1.5"><span class="text-3xl font-extrabold text-gray-900" id="extra-approx">150</span><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
+            </div>
+            <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#FDF2F8; border-color:#FBCFE8; ring-color:#FCE7F3;">
+              <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#EC4899">Ціль</label>
+              <div class="flex items-end gap-1.5"><input type="number" value="180" min="100" max="200" id="extra-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#DB2777"><span class="font-medium text-sm pb-1" style="color:#F9A8D4">/200</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <a href="https://osvita.ua/consultations/konkurs-ball/#google_vignette" target="_blank" onclick="event.stopPropagation()" class="mt-5 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-pink-50/50 hover:bg-pink-100 text-pink-600 text-[11px] font-bold uppercase tracking-widest transition-colors border border-transparent hover:border-pink-200">
+            Як обрати 4 предмет?
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="slide" id="quiz-section">
+    <div class="nav-tabs">
+      <button id="tab-math" class="nav-tab active" onclick="showSubject('math')">Математика</button>
+      <button id="tab-hist" class="nav-tab" onclick="showSubject('hist')">Історія</button>
+      <button id="tab-ukr" class="nav-tab" onclick="showSubject('ukr')">Українська</button>
+      <button id="tab-extra" class="nav-tab flex items-center justify-center gap-1.5" onclick="showSubject(document.getElementById('extra-pick').value)">
+          <span id="tab-extra-text">Біологія</span>
+          <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </button>
+    </div>
+
+    <div id="form-math" class="quiz-form-block">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#EBF5FF; color:#2F6FED">1</div><span class="font-bold text-gray-900 text-sm">Стереометрія</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#EBF5FF; color:#2F6FED">2</div><span class="font-bold text-gray-900 text-sm">Функції</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#EBF5FF; color:#2F6FED">3</div><span class="font-bold text-gray-900 text-sm">Тригонометрія</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">9/32</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-blue-600 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">10</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">142</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Кількість зошитів відноситься до кількості ручок як 3:4. Якою може бути загальна кількість ручок і зошитів?</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-math-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('math','A')"><span class="opt-letter">А</span><span class="opt-text">10</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('math','B')"><span class="opt-letter">Б</span><span class="opt-text">14</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('math','C')"><span class="opt-letter">В</span><span class="opt-text">8</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('math','D')"><span class="opt-letter">Г</span><span class="opt-text">15</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-math-btn" onclick="checkQuiz('math')" disabled>Перевірити відповідь</button>
+          <div id="quiz-math-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-hist" class="quiz-form-block" style="display:none">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FFF5F0; color:#E0703A">1</div><span class="font-bold text-gray-900 text-sm">Руїна</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FFF5F0; color:#E0703A">2</div><span class="font-bold text-gray-900 text-sm">Культура XIX ст.</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FFF5F0; color:#E0703A">3</div><span class="font-bold text-gray-900 text-sm">Укр. революція</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">5/54</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-orange-500 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">16</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">142</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Вкажіть, яке із козацько-селянських повстань XVI–XVII ст. відбулося найпершим</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-hist-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('hist','A')"><span class="opt-letter">А</span><span class="opt-text">Повстання Т. Федоровича</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('hist','B')"><span class="opt-letter">Б</span><span class="opt-text">Повстання С. Наливайка</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('hist','C')"><span class="opt-letter">В</span><span class="opt-text">Повстання І. Сулими</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('hist','D')"><span class="opt-letter">Г</span><span class="opt-text">Повстання К. Косинського</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-hist-btn" onclick="checkQuiz('hist')" disabled>Перевірити відповідь</button>
+          <div id="quiz-hist-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-ukr" class="quiz-form-block" style="display:none">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#F0FDF4; color:#16A34A">1</div><span class="font-bold text-gray-900 text-sm">Члени речення</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#F0FDF4; color:#16A34A">2</div><span class="font-bold text-gray-900 text-sm">Складні речення</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#F0FDF4; color:#16A34A">3</div><span class="font-bold text-gray-900 text-sm">Частини мови</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">15/45</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-green-600 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">28</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">154</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Оберіть речення, яке НЕ потребує редагування</div>
+          <div class="grid grid-cols-1 gap-4 mb-6" id="quiz-ukr-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('ukr','A')"><span class="opt-letter">А</span><span class="opt-text">Майже всі учні бігали по партах, галасували.</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('ukr','B')"><span class="opt-letter">Б</span><span class="opt-text">Майже усі учні бігали по партах, галасували.</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('ukr','C')"><span class="opt-letter">В</span><span class="opt-text">Майже всі учні бігали по партам, галасували.</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('ukr','D')"><span class="opt-letter">Г</span><span class="opt-text">Майже усі учні бігали по партам, галасували.</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-ukr-btn" onclick="checkQuiz('ukr')" disabled>Перевірити відповідь</button>
+          <div id="quiz-ukr-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-bio" class="quiz-form-block" style="display:none">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">1</div><span class="font-bold text-gray-900 text-sm">Ботаніка</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">2</div><span class="font-bold text-gray-900 text-sm">Зоологія</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">3</div><span class="font-bold text-gray-900 text-sm">Генетика</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">17/46</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-pink-600 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">22</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">149</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Який вуглевод міститься в ДНК?</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-bio-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('bio','A')"><span class="opt-letter">А</span><span class="opt-text">рибоза</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('bio','B')"><span class="opt-letter">Б</span><span class="opt-text">дезоксирибоза</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('bio','C')"><span class="opt-letter">В</span><span class="opt-text">піровиноградна кислота</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('bio','D')"><span class="opt-letter">Г</span><span class="opt-text">аденозин</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-bio-btn" onclick="checkQuiz('bio')" disabled>Перевірити відповідь</button>
+          <div id="quiz-bio-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-lit" class="quiz-form-block" style="display:none">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">1</div><span class="font-bold text-gray-900 text-sm">Літ. 20 століття</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">2</div><span class="font-bold text-gray-900 text-sm">Франко / Леся Українка</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">3</div><span class="font-bold text-gray-900 text-sm">Шевченко</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">12/45</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-pink-600 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">22</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">149</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Перші десятиріччя після скасування кріпацтва — історичне тло твору, у якому зав'язкою є</div>
+          <div class="grid grid-cols-1 gap-4 mb-6" id="quiz-lit-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('lit','A')"><span class="opt-letter">А</span><span class="opt-text">початок подорожі Енея з троянцями</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('lit','B')"><span class="opt-letter">Б</span><span class="opt-text">возний пропонує Наталці одружитися з ним</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('lit','C')"><span class="opt-letter">В</span><span class="opt-text">Карпо Кайдаш одружується з Мотрею</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('lit','D')"><span class="opt-letter">Г</span><span class="opt-text">приїзд Шрама із сином у Хмарище</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-lit-btn" onclick="checkQuiz('lit')" disabled>Перевірити відповідь</button>
+          <div id="quiz-lit-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-eng" class="quiz-form-block" style="display:none">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bento-card p-6 flex flex-col">
+          <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Теми, що дають найбільше балів</h3>
+          <ul class="flex-1 flex flex-col gap-3">
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">1</div><span class="font-bold text-gray-900 text-sm">Стратегії читання</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">2</div><span class="font-bold text-gray-900 text-sm">Лексика</span></li>
+            <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0" style="background:#FDF2F8; color:#DB2777">3</div><span class="font-bold text-gray-900 text-sm">Граматика</span></li>
+          </ul>
+          
+          <div class="flex items-center justify-center gap-2 sm:gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="w-[56px] h-[56px] rounded-full border-2 border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-50 shrink-0 shadow-sm">15/32</div>
+            <div class="text-xl text-gray-300 font-semibold">=</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-pink-600 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">28</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">тестових<br>балів</span>
+            </div>
+            <div class="text-xl text-gray-300 font-semibold">≈</div>
+            <div class="w-[68px] h-[68px] rounded-full bg-gray-900 flex flex-col items-center justify-center text-white shadow-md shrink-0">
+              <span class="text-xl font-extrabold leading-none">184</span>
+              <span class="text-[8px] font-medium text-center opacity-90 mt-1 leading-tight uppercase tracking-wider">з 200</span>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bento-card p-6">
+          <div class="flex justify-between items-center mb-6">
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+          </div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">... demonstrate how climate change can (42)_______ life on the continents</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-eng-opts">
+            <div class="quiz-option" data-val="A" onclick="selectOpt('eng','A')"><span class="opt-letter">А</span><span class="opt-text">transforms</span></div>
+            <div class="quiz-option" data-val="B" onclick="selectOpt('eng','B')"><span class="opt-letter">Б</span><span class="opt-text">transforming</span></div>
+            <div class="quiz-option" data-val="C" onclick="selectOpt('eng','C')"><span class="opt-letter">В</span><span class="opt-text">transform</span></div>
+            <div class="quiz-option" data-val="D" onclick="selectOpt('eng','D')"><span class="opt-letter">Г</span><span class="opt-text">to transform</span></div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold text-sm rounded-xl px-8 py-3.5 transition-all" id="quiz-eng-btn" onclick="checkQuiz('eng')" disabled>Перевірити відповідь</button>
+          <div id="quiz-eng-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="form-geo" class="quiz-form-block" style="display:none">
+        <div class="bento-card p-10 text-center">
+            <div class="text-4xl mb-4">🌍</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Географія: Тести готуються</h3>
+            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+        </div>
+    </div>
+    <div id="form-fiz" class="quiz-form-block" style="display:none">
+        <div class="bento-card p-10 text-center">
+            <div class="text-4xl mb-4">⚡</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Фізика: Тести готуються</h3>
+            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+        </div>
+    </div>
+    <div id="form-chem" class="quiz-form-block" style="display:none">
+        <div class="bento-card p-10 text-center">
+            <div class="text-4xl mb-4">🧪</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Хімія: Тести готуються</h3>
+            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+        </div>
+    </div>
+    <div id="form-other_lang" class="quiz-form-block" style="display:none">
+        <div class="bento-card p-10 text-center">
+            <div class="text-4xl mb-4">💬</div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Іноземна мова: Тести готуються</h3>
+            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+        </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════════ Прихований шаблон для генерації PDF (html2pdf.js) ══════════ -->
+<div id="pdf-export-root">
+  <div class="pdf-top-gradient"></div>
+  <div class="pdf-inner">
+    <h1>Індивідуальна стратегія підготовки до НМТ</h1>
+    <div class="pdf-pib">ПІБ: <span class="pdf-line" id="pdf-out-pib"></span></div>
+
+    <div class="pdf-section-label">Поточні та омріяні бали</div>
+    <div class="pdf-scores-box" id="pdf-scores-box"></div>
+    <div class="pdf-legend">
+      <span><span class="pdf-dot light"></span>Зараз</span>
+      <span><span class="pdf-dot dark"></span>Ціль</span>
+    </div>
+
+    <div class="pdf-banner-pink">Як обрати 4 предмет?</div>
+
+    <div class="pdf-section-label">Теми, що дають найбільше балів</div>
+    <div class="pdf-topics-grid" id="pdf-topics-grid"></div>
+
+    <div class="pdf-banner-dark">Програма з усіх предметів</div>
+  </div>
+
+  <div class="pdf-pricing-wrap">
+    <div class="pdf-pricing-title">Обери свій формат підготовки</div>
+    <div class="pdf-plans" id="pdf-plans-grid"></div>
+
+    <div class="pdf-info-row">
+      <div class="pdf-info-card">
+        <div class="pdf-info-num">1</div>
+        <div>Вартість з урахуванням гранту за програмою «Доступна освіта»: <b>−35% на перший предмет</b></div>
+      </div>
+      <div class="pdf-info-card">
+        <div class="pdf-info-num">2</div>
+        <div>Вигідніше оплачувати <b>одразу за весь курс</b></div>
+      </div>
+    </div>
+
+    <div class="pdf-info-bar-dark">
+      <div class="pdf-info-num">3</div>
+      <div>
+        <div class="pdf-title-strong">Спеціальні умови комплексної підготовки</div>
+        <div class="pdf-sub">додаткові знижки при реєстрації на декілька предметів</div>
+      </div>
+      <div class="pdf-pill">−5% на другий та третій предмети</div>
+      <div class="pdf-pill">безкоштовно четвертий предмет</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Tabs & Navigation Logic ── */
+const allForms = ['math','hist','ukr','bio','lit','eng','geo','fiz','chem','other_lang'];
+const tabMapping = {'math':'tab-math', 'hist':'tab-hist', 'ukr':'tab-ukr'};
+
+function showSubject(key) {
+  document.querySelectorAll('.quiz-form-block').forEach(el => el.style.display = 'none');
+  const targetForm = document.getElementById('form-'+key);
+  if(targetForm) targetForm.style.display = 'block';
+
+  document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+  
+  if (tabMapping[key]) {
+      document.getElementById(tabMapping[key]).classList.add('active');
+  } else {
+      document.getElementById('tab-extra').classList.add('active');
+  }
+}
+
+function scrollToQuiz(subjectKey) {
+  let targetKey = subjectKey;
+  if (subjectKey === 'extra') {
+      targetKey = document.getElementById('extra-pick').value;
+  }
+  showSubject(targetKey);
+  document.getElementById('quiz-section').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+function syncExtraSubject() {
+    const select = document.getElementById('extra-pick');
+    const val = select.value;
+    const text = select.options[select.selectedIndex].text;
+    
+    document.getElementById('tab-extra-text').innerText = text;
+    document.getElementById('tab-extra').setAttribute('onclick', `showSubject('${val}')`);
+    
+    if (document.getElementById('tab-extra').classList.contains('active')) {
+        showSubject(val);
+    }
+}
+ 
+/* ── Quiz Logic (Оновлено з Лайфгаками та Новим текстом) ── */
+const quizConfig = {
+  math: { 
+      correct:'B', 
+      feedback:{ 
+          correct:'14 ÷ 7 = 2 (зошитів 6, ручок 8).<br><br><strong class="inline-strong">Лайфгак:</strong> загальна кількість завжди має ділитися на суму частин відношення (3+4=7). Тільки 14 ділиться на 7 без остачі!', 
+          wrong:' Б: 14.<br><br><strong class="inline-strong">Лайфгак:</strong> загальна кількість завжди має ділитися на суму частин відношення (3+4=7). Серед варіантів тільки 14 ділиться на 7 без остачі!' 
+      }
+  },
+  hist: { 
+      correct:'D', 
+      feedback:{ 
+          correct:'Повстання К. Косинського (1591–1593) — перше козацько-селянське повстання.<br><br><strong class="inline-strong">Лайфгак:</strong> запам\'ятай фразу «СПОЧАТКУ КОСИМО, А ПОТІМ НАЛИВАЄМО» (Косинського -> Наливайка).', 
+          wrong:' Г: Повстання К. Косинського.<br><br><strong class="inline-strong">Лайфгак:</strong> запам\'ятай фразу «СПОЧАТКУ КОСИМО, А ПОТІМ НАЛИВАЄМО» (спочатку Косинського, потім Наливайка).' 
+      }
+  },
+  ukr:  { 
+      correct:'A', 
+      feedback:{ 
+          correct:'Обидва правила дотримані!<br><br><strong class="inline-strong">Лайфгак:</strong> «МайжЕ» + далі слово з приголосного → пишемо «всі».<br><strong class="inline-strong">Правило ПОХ:</strong> коли є прийменник «по-», то в закінченні має бути «-х» (по партах).', 
+          wrong:' А.<br><br><strong class="inline-strong">Лайфгак:</strong> «МайжЕ» + далі слово з приголосного → пишемо «всі».<br><strong class="inline-strong">Правило ПОХ:</strong> коли є прийменник «по-», то в закінченні має бути «-х» (по партах).' 
+      }
+  },
+  bio:  { 
+      correct:'B', 
+      feedback:{ 
+          correct:'ДНК містить дезоксирибозу!<br><br><strong class="inline-strong">Лайфгак:</strong> ДНК = Дезоксирибонуклеїнова кислота. Перша літера підказує: Д — Дезоксирибоза, Р (РНК) — Рибоза.', 
+          wrong:' Б.<br><br><strong class="inline-strong">Лайфгак:</strong> ДНК = Дезоксирибонуклеїнова кислота. Перша літера підказує: Д — Дезоксирибоза, Р (РНК) — Рибоза.' 
+      }
+  },
+  eng:  { 
+      correct:'C', 
+      feedback:{ 
+          correct:'Після модального дієслова can стоїть інфінітив без to: can transform.<br><br><strong class="inline-strong">Лайфгак:</strong> після модальних дієслів (can, must, should) ніколи немає частки «to» і немає жодних закінчень (-s, -ing, -ed).', 
+          wrong:' В: transform.<br><br><strong class="inline-strong">Лайфгак:</strong> після модальних дієслів (can, must, should) ніколи немає частки «to» і немає жодних закінчень (-s, -ing, -ed).' 
+      }
+  },
+  lit:  { 
+      correct:'C', 
+      feedback:{ 
+          correct:'Дія розгортається в перші десятиліття після скасування кріпацтва (1861 р.).<br><br><strong class="inline-strong">Лайфгак:</strong> кріпацтво скасували у 1861 році — саме на цей час припадає одруження Карпа й Мотрі («Кайдашева сім\'я»).', 
+          wrong:' В: Карпо Кайдаш одружується з Мотрею.<br><br><strong class="inline-strong">Лайфгак:</strong> кріпацтво скасували у 1861 році — саме на цей час припадає подія в «Кайдашевій сім\'ї».' 
+      }
+  }
+};
+const quizState = {};
+ 
+function selectOpt(subject, val) {
+  if (quizState[subject]?.answered) return;
+  quizState[subject] = quizState[subject] || {};
+  quizState[subject].selected = val;
+  document.querySelectorAll(`#quiz-${subject}-opts .quiz-option`).forEach(el => el.classList.toggle('selected', el.dataset.val===val));
+  document.getElementById(`quiz-${subject}-btn`).disabled = false;
+}
+ 
+function checkQuiz(subject) {
+  const state = quizState[subject];
+  if (!state?.selected || state.answered) return;
+  state.answered = true;
+  const correct = quizConfig[subject].correct;
+  const isRight = state.selected === correct;
+  const fb = quizConfig[subject].feedback;
+  
+  document.querySelectorAll(`#quiz-${subject}-opts .quiz-option`).forEach(el => {
+    el.classList.add('locked');
+    if (el.dataset.val === correct) el.classList.add(isRight && el.dataset.val===state.selected ? 'correct' : 'show-correct');
+    if (!isRight && el.dataset.val===state.selected) el.classList.add('wrong');
+  });
+  
+  const fbEl = document.getElementById(`quiz-${subject}-feedback`);
+  fbEl.style.display = 'block';
+  
+  fbEl.innerHTML = isRight
+    ? `<div class="quiz-feedback correct-fb"><span class="fb-icon">🎯</span><div class="fb-text"><strong>МОЛОДЕЦЬ! Відповідь правильна</strong>${fb.correct}</div></div>`
+    : `<div class="quiz-feedback wrong-fb"><span class="fb-icon">💡</span><div class="fb-text"><strong>ПОМИЛКА! Правильна відповідь:</strong>${fb.wrong}</div></div>`;
+  
+  document.getElementById(`quiz-${subject}-btn`).disabled = true;
+}
+ 
+/* ── Логіка рівня (0-10 -> 100-200) ── */
+function levelToScore(level) {
+  if (level <= 0) return 100;
+  return 100 + level * 10;
+}
+
+const levelSquareSubjects = ['math','history','ukr2','extra'];
+
+function setLevel(subject, value) {
+  const currentInput = document.getElementById(subject+'-level');
+  currentInput.value = value;
+  renderSquares(subject);
+  updateScores();
+}
+
+function renderSquares(subject) {
+  const wrap = document.getElementById(subject+'-level-squares');
+  if (!wrap) return;
+  const current = parseInt(document.getElementById(subject+'-level').value) || 0;
+  wrap.innerHTML = '';
+  for (let i=1;i<=10;i++) {
+    const sq = document.createElement('div');
+    sq.className = 'level-square' + (i<=current ? ' filled' : '');
+    sq.title = 'Рівень ' + i;
+    sq.addEventListener('click', (e) => { e.stopPropagation(); setLevel(subject, i); });
+    wrap.appendChild(sq);
+  }
+}
+
+function initLevelSquares() {
+  levelSquareSubjects.forEach(renderSquares);
+}
+
+const fixedSubjects = [
+  {label:'Математика',levelId:'math-level',   levelValId:'math-level-val',   goalId:'math-goal',   approxId:'math-approx',    color:'#2F6FED'},
+  {label:'Історія',   levelId:'history-level',levelValId:'history-level-val',goalId:'history-goal', approxId:'history-approx', color:'#E0703A'},
+  {label:'Українська',levelId:'ukr2-level',   levelValId:'ukr2-level-val',   goalId:'ukr2-goal',    approxId:'ukr2-approx',    color:'#16A34A'},
+];
+ 
+function getAll() {
+  const rows = fixedSubjects.map(s => ({
+    label:s.label,
+    level:parseInt(document.getElementById(s.levelId)?.value)||0,
+    now:levelToScore(parseInt(document.getElementById(s.levelId)?.value)||0),
+    goal:parseInt(document.getElementById(s.goalId)?.value)||0,
+    approxId:s.approxId, levelValId:s.levelValId,
+    color:s.color
+  }));
+  rows.push({
+    label: {
+        bio:'Біологія',
+        lit:'Укр. літ.',
+        eng:'Англійська',
+        geo:'Географія',
+        fiz:'Фізика',
+        chem:'Хімія',
+        other_lang:'Інша іноз. мова'
+    }[document.getElementById('extra-pick').value],
+    level:parseInt(document.getElementById('extra-level')?.value)||0,
+    now:levelToScore(parseInt(document.getElementById('extra-level')?.value)||0),
+    goal:parseInt(document.getElementById('extra-goal')?.value)||0,
+    approxId:'extra-approx', levelValId:'extra-level-val',
+    color:'#DB2777'
+  });
+  return rows;
+}
+ 
+function updateScores() {
+  const rows = getAll();
+  rows.forEach(r => {
+    const lvlEl = document.getElementById(r.levelValId);
+    if (lvlEl) lvlEl.textContent = r.level;
+    const approxEl = document.getElementById(r.approxId);
+    if (approxEl) approxEl.textContent = r.now;
+  });
+}
+
+/* ══════════ Генерація PDF ══════════ */
+
+const PDF_PALETTE = {
+  blue:   {dark:"#2F6FED", light:"#C9DAFB"},
+  orange: {dark:"#E0703A", light:"#FFDDBE"},
+  green:  {dark:"#16A34A", light:"#BDEECD"},
+  pink:   {dark:"#DB2777", light:"#FBCBE2"}
+};
+
+/* Теми по предметам — ті самі, що показані у блоках "Швидка діагностика" */
+const PDF_TOPICS = {
+  math: ["Стереометрія", "Функції", "Тригонометрія"],
+  hist: ["Руїна", "Культура XIX ст.", "Укр. революція"],
+  ukr:  ["Члени речення", "Складні речення", "Частини мови"],
+  bio:  ["Ботаніка", "Зоологія", "Генетика"],
+  lit:  ["Літ. 20 століття", "Франко / Леся Українка", "Шевченко"],
+  eng:  ["Стратегії читання", "Лексика", "Граматика"],
+  geo: [], fiz: [], chem: [], other_lang: []
+};
+
+const PDF_EXTRA_LABELS = {
+  bio:'Біологія', lit:'Укр. література', eng:'Англійська мова',
+  geo:'Географія', fiz:'Фізика', chem:'Хімія', other_lang:'Інша іноз. мова'
+};
+
+const pdfPricingData = [
+  {
+    key:"basic", cls:"basic", icon:"●", name:"БАЗОВИЙ",
+    features:[
+      "Платформа з аналітикою та трекінгом",
+      "2 online-вебінари на тиждень з предмету, записи зберігаються",
+      "Авторські конспекти, теоретичні відеоуроки та робочі зошити",
+      "Інтерактивний додаток для вивчення матеріалу",
+      "Практика до кожної теми з розбором",
+      "Спільний хелпер групи",
+      "Кишеньковий AI-помічник",
+      "Найбільша база зливів тестів, які можуть повторитись",
+      "Щомісячні пробні НМТ",
+      "Закрите ком'юніті одногрупників"
+    ],
+    monthly:790, monthlyOld:1220, full:6400, fullOld:9850
+  },
+  {
+    key:"premium", cls:"featured", icon:"★", name:"ПРЕМІУМ", badge:"найпопулярніший",
+    includes:"+ усе, що «БАЗОВИЙ»",
+    features:[
+      "Персональна стратегія підготовки",
+      "Особистий хелпер: індивідуальне відслідковування прогресу",
+      "Тести на закріплення за рівнями, поточні контролі та заліки",
+      "Практичні відеоуроки та зошити, шпаргалки, файли-вижимки",
+      "Індивідуальні усні опитування",
+      "Подкасти та інтерактиви-повторення",
+      "Психологічна підтримка",
+      "Стратегічні онлайн-сесії для батьків та вступників",
+      "Подарунки за успішне навчання",
+      "Курси «Прокачка soft та hard skills» та «Вступ без паніки»"
+    ],
+    monthly:1090, monthlyOld:1680, full:8800, fullOld:13550
+  },
+  {
+    key:"mentor", cls:"mentor", icon:"⚡", name:"НАСТАВНИЦТВО",
+    includes:"+ усе, що в «БАЗОВИЙ», «ПРЕМІУМ»",
+    features:[
+      "Індивідуальне наставництво викладача",
+      "Закриті онлайн-зустрічі з експертом",
+      "Додаткові пробні НМТ з пройдених тем",
+      "Персоналізований набір практики",
+      "Навчальний збірник «База предмета»",
+      "Допомога зі шкільною домашкою",
+      "Фінальний інтенсив-повторення програми за 5 днів",
+      "Особиста стратегія вступу з профорієнтологом"
+    ],
+    monthly:2090, monthlyOld:3220, full:16900, fullOld:26000
+  }
+];
+
+/* Збирає актуальні дані прямо з дашборду */
+function buildPdfSubjects() {
+  const extraKey = document.getElementById('extra-pick').value;
+  return [
+    { name:"Математика", color:"blue",
+      current: levelToScore(parseInt(document.getElementById('math-level').value)||0),
+      target: parseInt(document.getElementById('math-goal').value)||0,
+      topics: PDF_TOPICS.math },
+    { name:"Історія", color:"orange",
+      current: levelToScore(parseInt(document.getElementById('history-level').value)||0),
+      target: parseInt(document.getElementById('history-goal').value)||0,
+      topics: PDF_TOPICS.hist },
+    { name:"Українська мова", color:"green",
+      current: levelToScore(parseInt(document.getElementById('ukr2-level').value)||0),
+      target: parseInt(document.getElementById('ukr2-goal').value)||0,
+      topics: PDF_TOPICS.ukr },
+    { name: PDF_EXTRA_LABELS[extraKey] || "Предмет за вибором", color:"pink",
+      current: levelToScore(parseInt(document.getElementById('extra-level').value)||0),
+      target: parseInt(document.getElementById('extra-goal').value)||0,
+      topics: PDF_TOPICS[extraKey] || [] }
+  ];
+}
+
+function fillPdfTemplate() {
+  const pib = document.getElementById('pib-input').value.trim();
+  document.getElementById('pdf-out-pib').textContent = pib || "________________________";
+
+  const subjects = buildPdfSubjects();
+  const scoresBox = document.getElementById('pdf-scores-box');
+  const topicsGrid = document.getElementById('pdf-topics-grid');
+  scoresBox.innerHTML = "";
+  topicsGrid.innerHTML = "";
+
+  const maxVal = 200, minVal = 100, maxH = 170;
+  subjects.forEach(s => {
+    const c = PDF_PALETTE[s.color];
+    const curH = Math.max(6, ((s.current - minVal) / (maxVal - minVal)) * maxH);
+    const tgtH = Math.max(6, ((s.target  - minVal) / (maxVal - minVal)) * maxH);
+
+    scoresBox.insertAdjacentHTML("beforeend", `
+      <div class="pdf-score-item">
+        <div class="pdf-bars">
+          <div class="pdf-bar" style="height:${curH}px;background:${c.light};">
+            <span class="pdf-val" style="color:${c.dark}">${s.current}</span>
+          </div>
+          <div class="pdf-bar" style="height:${tgtH}px;background:${c.dark};">
+            <span class="pdf-val" style="color:${c.dark}">${s.target}</span>
+          </div>
+        </div>
+        <div class="pdf-subject-name" style="color:${c.dark}">${s.name}</div>
+      </div>
+    `);
+
+    const topicRows = s.topics.length
+      ? s.topics.map((t,i) => `
+          <div class="pdf-topic-row">
+            <span class="pdf-topic-num" style="border-color:${c.dark}; color:${c.dark};">${i+1}</span>
+            <span>${t}</span>
+          </div>`).join("")
+      : `<div class="pdf-empty-topics">Матеріали готуються</div>`;
+
+    topicsGrid.insertAdjacentHTML("beforeend", `
+      <div class="pdf-topic-card">
+        <div class="pdf-subj" style="color:${c.dark}">${s.name}</div>
+        ${topicRows}
+      </div>
+    `);
+  });
+
+  const plansGrid = document.getElementById('pdf-plans-grid');
+  plansGrid.innerHTML = "";
+  pdfPricingData.forEach(p => {
+    plansGrid.insertAdjacentHTML("beforeend", `
+      <div class="pdf-plan ${p.cls}">
+        ${p.badge ? `<div class="pdf-badge">${p.badge}</div>` : ""}
+        <div class="pdf-plan-icon">${p.icon}</div>
+        <div class="pdf-plan-name">${p.name}</div>
+        ${p.includes ? `<div class="pdf-includes">${p.includes}</div>` : ""}
+        <ul class="pdf-feat-list">${p.features.map(f => `<li>${f}</li>`).join("")}</ul>
+        <div class="pdf-price-block">
+          <div class="pdf-price-row">Оплата щомісяця:</div>
+          <div class="pdf-price-now">${p.monthly}<span class="pdf-cur">грн</span><span class="pdf-price-old">${p.monthlyOld} грн</span></div>
+          <div class="pdf-price-row" style="margin-top:8px;">Весь курс одразу:</div>
+          <div class="pdf-price-now">${p.full}<span class="pdf-cur">грн</span><span class="pdf-price-old">${p.fullOld} грн</span></div>
+        </div>
+      </div>
+    `);
+  });
+}
+
+function exportPdf() {
+  const btn = document.getElementById('export-pdf-btn');
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Генеруємо...';
+
+  fillPdfTemplate();
+
+  const element = document.getElementById('pdf-export-root');
+  const pib = document.getElementById('pib-input').value.trim();
+  const filename = `НМТ-стратегія${pib ? ' - ' + pib : ''}.pdf`;
+
+  const opt = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, windowWidth: 900 },
+    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }).catch(err => {
+    console.error(err);
+    alert('Не вдалося згенерувати PDF. Спробуйте ще раз.');
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  });
+}
+
+setTimeout(()=>{ 
+    initLevelSquares(); 
+    syncExtraSubject();
+    updateScores(); 
+}, 120);
+</script>
+</body>
+</html>
