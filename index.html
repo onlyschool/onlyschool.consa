@@ -949,6 +949,8 @@ async function exportPdf() {
           Rect: [x, yPos, x + w, yPos + h],
           Border: [0, 0, 0],
           C: [0, 0, 0],
+          F: 4,
+          P: targetPage.ref,
           A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) },
         })
       );
