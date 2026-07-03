@@ -949,7 +949,7 @@ async function exportPdf() {
           Rect: [x, yPos, x + w, yPos + h],
           Border: [0, 0, 0],
           C: [0, 0, 0],
-          A: { Type: 'Action', S: 'URI', URI: url },
+          A: { Type: 'Action', S: 'URI', URI: PDFLib.PDFString.of(url) },
         })
       );
       targetPage.node.addAnnot(annotRef);
@@ -1515,7 +1515,7 @@ async function exportPdf() {
     drawText(pill1Text, pillsX+11, pill1Top-pillH3+pillH3/2-pill1Size*0.35, pill1Size, { bold:true, color: navy });
     drawRoundedRect(pillsX, pill2Top-pillH3, pillsW, pillH3, 10, { color: white });
     drawText(pill2Text, pillsX+11, pill2Top-pillH3+pillH3/2-pill2Size*0.35, pill2Size, { bold:true, color: navy });
-    y -= darkH + 10;
+    y -= darkH + 34;
 
     /* ── Фінальний блок: кнопка запису + Instagram (по центру сторінки) ── */
     ensureSpace(60);
