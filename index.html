@@ -90,17 +90,17 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
   <header class="max-w-[1100px] mx-auto mb-10 flex flex-col md:flex-row md:items-start justify-between gap-6 px-2">
       <div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3 uppercase leading-tight">Особиста стратегія<br>підготовки до НМТ</h1>
-          <p class="text-gray-500 font-medium text-lg">Встановіть поточний рівень та омріяні бали</p>
+
       </div>
       
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
           <div class="flex flex-col gap-1 w-full sm:w-48">
               <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1">Ім'я та Прізвище</label>
-              <input type="text" id="pib-input" placeholder="Введіть дані..." class="text-sm font-semibold bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all h-[42px]">
+              <input type="text" id="pib-input" placeholder="Введіть дані..." class="text-sm font-semibold placeholder:font-normal bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition-all h-[42px]">
           </div>
           <button id="export-pdf-btn" onclick="exportPdf()" class="w-full sm:w-auto bg-gray-900 hover:bg-black text-white font-bold text-sm rounded-xl px-6 py-3 transition-all h-[42px] flex items-center justify-center gap-2 shrink-0">
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="12" y2="11"/></svg>
-              <span id="export-pdf-label">PDF Звіт</span>
+              <span id="export-pdf-label">PDF</span>
           </button>
       </div>
   </header>
@@ -123,7 +123,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             <span class="text-xl font-extrabold text-blue-600" id="math-level-val">5</span>
           </div>
           <div class="level-squares" id="math-level-squares" data-subject="math"></div>
-          <input type="hidden" id="math-level" value="5">
+          <input type="hidden" id="math-level" value="0">
         </div>
 
         <div class="flex gap-4" onclick="event.stopPropagation()">
@@ -137,8 +137,8 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
           <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#F0F5FF; border-color:#BFD4FB; ring-color:#EAF1FE;">
             <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#6B93F2">Ціль</label>
             <div class="flex items-end gap-1.5">
-              <input type="number" value="185" min="100" max="200" id="math-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#2F6FED">
-              <span class="font-medium text-sm pb-1" style="color:#8EADF5">/200</span>
+              <input type="number" min="100" max="200" id="math-goal" placeholder="200" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#2F6FED">
+              <span class="text-gray-400 font-medium text-sm pb-1">/200</span>
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             <span class="text-xl font-extrabold text-orange-600" id="history-level-val">5</span>
           </div>
           <div class="level-squares" id="history-level-squares" data-subject="history"></div>
-          <input type="hidden" id="history-level" value="5">
+          <input type="hidden" id="history-level" value="0">
         </div>
 
         <div class="flex gap-4" onclick="event.stopPropagation()">
@@ -169,7 +169,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
           </div>
           <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#FFF5F0; border-color:#FED7AA; ring-color:#FFEDD5;">
             <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#F97316">Ціль</label>
-            <div class="flex items-end gap-1.5"><input type="number" value="180" min="100" max="200" id="history-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#EA580C"><span class="font-medium text-sm pb-1" style="color:#FDBA74">/200</span></div>
+            <div class="flex items-end gap-1.5"><input type="number" min="100" max="200" id="history-goal" placeholder="200" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#EA580C"><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
           </div>
         </div>
       </div>
@@ -189,7 +189,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             <span class="text-xl font-extrabold text-green-600" id="ukr2-level-val">5</span>
           </div>
           <div class="level-squares" id="ukr2-level-squares" data-subject="ukr2"></div>
-          <input type="hidden" id="ukr2-level" value="5">
+          <input type="hidden" id="ukr2-level" value="0">
         </div>
 
         <div class="flex gap-4" onclick="event.stopPropagation()">
@@ -199,7 +199,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
           </div>
           <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#F0FDF4; border-color:#BBF7D0; ring-color:#DCFCE7;">
             <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#22C55E">Ціль</label>
-            <div class="flex items-end gap-1.5"><input type="number" value="195" min="100" max="200" id="ukr2-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#16A34A"><span class="font-medium text-sm pb-1" style="color:#86EFAC">/200</span></div>
+            <div class="flex items-end gap-1.5"><input type="number" min="100" max="200" id="ukr2-goal" placeholder="200" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#16A34A"><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
           </div>
         </div>
       </div>
@@ -228,7 +228,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
               <span class="text-xl font-extrabold text-pink-600" id="extra-level-val">5</span>
             </div>
             <div class="level-squares" id="extra-level-squares" data-subject="extra"></div>
-            <input type="hidden" id="extra-level" value="5">
+            <input type="hidden" id="extra-level" value="0">
           </div>
 
           <div class="flex gap-4" onclick="event.stopPropagation()">
@@ -238,7 +238,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
             </div>
             <div class="flex-1 rounded-2xl p-4 border transition-all focus-within:ring-4" style="background:#FDF2F8; border-color:#FBCFE8; ring-color:#FCE7F3;">
               <label class="block text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#EC4899">Ціль</label>
-              <div class="flex items-end gap-1.5"><input type="number" value="180" min="100" max="200" id="extra-goal" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#DB2777"><span class="font-medium text-sm pb-1" style="color:#F9A8D4">/200</span></div>
+              <div class="flex items-end gap-1.5"><input type="number" min="100" max="200" id="extra-goal" placeholder="200" oninput="updateScores()" class="text-3xl font-extrabold bg-transparent border-none p-0 focus:ring-0 w-16 outline-none" style="color:#DB2777"><span class="text-gray-400 font-medium text-sm pb-1">/200</span></div>
             </div>
           </div>
         </div>
@@ -285,7 +285,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
           <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Кількість зошитів відноситься до кількості ручок як 3:4. Якою може бути загальна кількість ручок і зошитів?</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-math-opts">
@@ -321,7 +321,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         </div>
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
           <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Вкажіть, яке із козацько-селянських повстань XVI–XVII ст. відбулося найпершим</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-hist-opts">
@@ -357,7 +357,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         </div>
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
           <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Оберіть речення, яке НЕ потребує редагування</div>
           <div class="grid grid-cols-1 gap-4 mb-6" id="quiz-ukr-opts">
@@ -393,7 +393,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         </div>
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
           <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Який вуглевод міститься в ДНК?</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-bio-opts">
@@ -429,7 +429,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         </div>
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
           <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">Перші десятиріччя після скасування кріпацтва — історичне тло твору, у якому зав'язкою є</div>
           <div class="grid grid-cols-1 gap-4 mb-6" id="quiz-lit-opts">
@@ -465,9 +465,9 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         </div>
         <div class="lg:col-span-2 bento-card p-6">
           <div class="flex justify-between items-center mb-6">
-             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3><p class="text-sm text-gray-500 font-medium">Пройди тест, щоб ми знайшли твої слабкі місця</p></div>
+             <div><h3 class="text-2xl font-extrabold text-gray-900 mb-1">Швидка діагностика</h3></div>
           </div>
-          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">... demonstrate how climate change can (42)_______ life on the continents</div>
+          <div class="text-lg font-bold text-gray-900 mb-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">... demonstrate how climate change can _______ life on the continents</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="quiz-eng-opts">
             <div class="quiz-option" data-val="A" onclick="selectOpt('eng','A')"><span class="opt-letter">А</span><span class="opt-text">transforms</span></div>
             <div class="quiz-option" data-val="B" onclick="selectOpt('eng','B')"><span class="opt-letter">Б</span><span class="opt-text">transforming</span></div>
@@ -483,29 +483,25 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     <div id="form-geo" class="quiz-form-block" style="display:none">
         <div class="bento-card p-10 text-center">
             <div class="text-4xl mb-4">🌍</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Географія: Тести готуються</h3>
-            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+            <h3 class="text-2xl font-bold text-gray-900">Тести готуються</h3>
         </div>
     </div>
     <div id="form-fiz" class="quiz-form-block" style="display:none">
         <div class="bento-card p-10 text-center">
             <div class="text-4xl mb-4">⚡</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Фізика: Тести готуються</h3>
-            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+            <h3 class="text-2xl font-bold text-gray-900">Тести готуються</h3>
         </div>
     </div>
     <div id="form-chem" class="quiz-form-block" style="display:none">
         <div class="bento-card p-10 text-center">
             <div class="text-4xl mb-4">🧪</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Хімія: Тести готуються</h3>
-            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+            <h3 class="text-2xl font-bold text-gray-900">Тести готуються</h3>
         </div>
     </div>
     <div id="form-other_lang" class="quiz-form-block" style="display:none">
         <div class="bento-card p-10 text-center">
             <div class="text-4xl mb-4">💬</div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Іноземна мова: Тести готуються</h3>
-            <p class="text-gray-500">Ми вже працюємо над додаванням діагностики для цього предмета.</p>
+            <h3 class="text-2xl font-bold text-gray-900">Тести готуються</h3>
         </div>
     </div>
 
@@ -557,47 +553,29 @@ function syncExtraSubject() {
  
 /* ── Quiz Logic (Оновлено з Лайфгаками та Новим текстом) ── */
 const quizConfig = {
-  math: { 
-      correct:'B', 
-      feedback:{ 
-          correct:'14 ÷ 7 = 2 (зошитів 6, ручок 8).<br><br><strong class="inline-strong">Лайфгак:</strong> загальна кількість завжди має ділитися на суму частин відношення (3+4=7). Тільки 14 ділиться на 7 без остачі!', 
-          wrong:' Б: 14.<br><br><strong class="inline-strong">Лайфгак:</strong> загальна кількість завжди має ділитися на суму частин відношення (3+4=7). Серед варіантів тільки 14 ділиться на 7 без остачі!' 
-      }
+  math: {
+      correct:'B',
+      lifehack:'Загальна кількість завжди має ділитися на суму частин відношення (3+4=7). Тільки 14 ділиться на 7 без остачі!'
   },
-  hist: { 
-      correct:'D', 
-      feedback:{ 
-          correct:'Повстання К. Косинського (1591–1593) — перше козацько-селянське повстання.<br><br><strong class="inline-strong">Лайфгак:</strong> запам\'ятай фразу "СПОЧАТКУ КОСИМО, А ПОТІМ НАЛИВАЄМО" (Косинського -> Наливайка).', 
-          wrong:' Г: Повстання К. Косинського.<br><br><strong class="inline-strong">Лайфгак:</strong> запам\'ятай фразу "СПОЧАТКУ КОСИМО, А ПОТІМ НАЛИВАЄМО" (спочатку Косинського, потім Наливайка).' 
-      }
+  hist: {
+      correct:'D',
+      lifehack:'Запам\'ятай фразу «СПОЧАТКУ КОСИМО, А ПОТІМ НАЛИВАЄМО» (Косинського → Наливайка).'
   },
-  ukr:  { 
-      correct:'A', 
-      feedback:{ 
-          correct:'Обидва правила дотримані!<br><br><strong class="inline-strong">Лайфгак:</strong> "МайжЕ" + далі слово з приголосного → пишемо "всі".<br><strong class="inline-strong">Правило ПОХ:</strong> коли є прийменник "по-", то в закінченні має бути "-х" (по партах).', 
-          wrong:' А.<br><br><strong class="inline-strong">Лайфгак:</strong> "МайжЕ" + далі слово з приголосного → пишемо "всі".<br><strong class="inline-strong">Правило ПОХ:</strong> коли є прийменник "по-", то в закінченні має бути "-х" (по партах).' 
-      }
+  ukr:  {
+      correct:'A',
+      lifehack:'«МайжЕ» + далі слово з приголосного → пишемо «всі». Правило ПОХ: коли є прийменник «по-», то в закінченні має бути «-х» (по партах).'
   },
-  bio:  { 
-      correct:'B', 
-      feedback:{ 
-          correct:'ДНК містить дезоксирибозу!<br><br><strong class="inline-strong">Лайфгак:</strong> ДНК = Дезоксирибонуклеїнова кислота. Перша літера підказує: Д — Дезоксирибоза, Р (РНК) — Рибоза.', 
-          wrong:' Б.<br><br><strong class="inline-strong">Лайфгак:</strong> ДНК = Дезоксирибонуклеїнова кислота. Перша літера підказує: Д — Дезоксирибоза, Р (РНК) — Рибоза.' 
-      }
+  bio:  {
+      correct:'B',
+      lifehack:'ДНК = Дезоксирибонуклеїнова кислота. Перша літера підказує: Д — Дезоксирибоза, Р (РНК) — Рибоза.'
   },
-  eng:  { 
-      correct:'C', 
-      feedback:{ 
-          correct:'Після модального дієслова can стоїть інфінітив без to: can transform.<br><br><strong class="inline-strong">Лайфгак:</strong> після модальних дієслів (can, must, should) ніколи немає частки "to" і немає жодних закінчень (-s, -ing, -ed).', 
-          wrong:' В: transform.<br><br><strong class="inline-strong">Лайфгак:</strong> після модальних дієслів (can, must, should) ніколи немає частки "to" і немає жодних закінчень (-s, -ing, -ed).' 
-      }
+  eng:  {
+      correct:'C',
+      lifehack:'Після модальних дієслів (can, must, should) ніколи немає частки «to» і немає жодних закінчень (-s, -ing, -ed).'
   },
-  lit:  { 
-      correct:'C', 
-      feedback:{ 
-          correct:'Дія розгортається в перші десятиліття після скасування кріпацтва (1861 р.).<br><br><strong class="inline-strong">Лайфгак:</strong> кріпацтво скасували у 1861 році — саме на цей час припадає одруження Карпа й Мотрі ("Кайдашева сім\'я").', 
-          wrong:' В: Карпо Кайдаш одружується з Мотрею.<br><br><strong class="inline-strong">Лайфгак:</strong> кріпацтво скасували у 1861 році — саме на цей час припадає подія в "Кайдашевій сім\'ї".' 
-      }
+  lit:  {
+      correct:'C',
+      lifehack:'Кріпацтво скасували у 1861 році — саме на цей час припадає одруження Карпа й Мотрі («Кайдашева сім\'я»).'
   }
 };
 const quizState = {};
@@ -616,7 +594,7 @@ function checkQuiz(subject) {
   state.answered = true;
   const correct = quizConfig[subject].correct;
   const isRight = state.selected === correct;
-  const fb = quizConfig[subject].feedback;
+  const lifehack = quizConfig[subject].lifehack;
   
   document.querySelectorAll(`#quiz-${subject}-opts .quiz-option`).forEach(el => {
     el.classList.add('locked');
@@ -627,9 +605,7 @@ function checkQuiz(subject) {
   const fbEl = document.getElementById(`quiz-${subject}-feedback`);
   fbEl.style.display = 'block';
   
-  fbEl.innerHTML = isRight
-    ? `<div class="quiz-feedback correct-fb"><span class="fb-icon">🎯</span><div class="fb-text"><strong>МОЛОДЕЦЬ! Відповідь правильна</strong>${fb.correct}</div></div>`
-    : `<div class="quiz-feedback wrong-fb"><span class="fb-icon">💡</span><div class="fb-text"><strong>ПОМИЛКА! Правильна відповідь:</strong>${fb.wrong}</div></div>`;
+  fbEl.innerHTML = `<div class="quiz-feedback ${isRight?'correct-fb':'wrong-fb'}"><span class="fb-icon">${isRight?'🎯':'💡'}</span><div class="fb-text"><div class="font-extrabold text-gray-900 mb-1">Відповідь: ${correct}</div><div>${lifehack}</div></div></div>`;
   
   document.getElementById(`quiz-${subject}-btn`).disabled = true;
 }
@@ -707,7 +683,7 @@ function updateScores() {
     const lvlEl = document.getElementById(r.levelValId);
     if (lvlEl) lvlEl.textContent = r.level;
     const approxEl = document.getElementById(r.approxId);
-    if (approxEl) approxEl.textContent = r.now;
+    if (approxEl) approxEl.textContent = r.level > 0 ? r.now : '—';
   });
 }
 
@@ -728,7 +704,7 @@ const PDF_TOPICS = {
   ukr2: ["Члени речення", "Складні речення", "Частини мови"],
   bio: ["Ботаніка", "Зоологія", "Генетика"],
   lit: ["Літ. 20 століття", "Франко / Леся Українка", "Шевченко"],
-  eng: ["Стратегії читання", "Лексика", "Граматика"],
+  eng: ["Стратегії читання", "Лексика для Use of English (easily confused words, prepositional phrases, phrasal verbs, synonyms)", "Граматика (часи, інфінітив/герундій, ступені порівняння)"],
   geo: [], fiz: [], chem: [], other_lang: []
 };
 
@@ -880,7 +856,7 @@ async function exportPdf() {
         });
         return;
       }
-      if (opt.bold && size >= 9.5) {
+      if (opt.bold && size >= 7.0) {
         const d = Math.max(0.22, Math.min(0.55, size*0.022));
         const offs = [[0,0],[d,0],[-d,0],[0,d],[0,-d]];
         offs.forEach(([dx,dy]) => page.drawText(text, { x:x+dx, y:yPos+dy, size, font, color: opt.color||navy }));
@@ -889,7 +865,7 @@ async function exportPdf() {
       }
     }
     function textWidth(text, size, bold) {
-      let w = font.widthOfTextAtSize(text, size) + (bold && size>=9.5 ? 0.3 : 0);
+      let w = font.widthOfTextAtSize(text, size) + (bold && size>=7.0 ? 0.3 : 0);
       const qCount = (text.match(/"/g)||[]).length;
       if (qCount) w += qCount * guillemetAdvance(size);
       return w;
@@ -990,6 +966,23 @@ async function exportPdf() {
       } else if (type === 'bolt') {
         const p = `M ${0.15*r} ${-r} L ${0.55*r} ${-0.15*r} L ${0.05*r} ${-0.15*r} L ${-0.15*r} ${r} L ${-0.55*r} ${0.15*r} L ${-0.05*r} ${0.15*r} Z`;
         page.drawSvgPath(p, { x:cx, y:cy, color: white });
+      } else if (type === 'gift') {
+        // Гарніша коробка подарунка: заокруглена, з кришкою і контрастною білою стрічкою
+        const boxColor = color, ribbonColor = white;
+        drawRoundedRect(cx-r*0.85, cy-r*0.85, r*1.7, r*1.5, r*0.2, { color: boxColor });
+        drawRoundedRect(cx-r*0.92, cy+r*0.3, r*1.84, r*0.3, r*0.12, { color: boxColor });
+        page.drawRectangle({ x:cx-r*0.13, y:cy-r*0.85, width:r*0.26, height:r*1.85, color: ribbonColor });
+        page.drawRectangle({ x:cx-r*0.92, y:cy-r*0.02, width:r*1.84, height:r*0.24, color: ribbonColor });
+        // бант (дві петлі) + вузол
+        const bow1 = `M ${-r*0.06} ${-r*0.32} L ${-r*0.6} ${-r*0.85} L ${-r*0.15} ${-r*0.55} Z`;
+        const bow2 = `M ${r*0.06} ${-r*0.32} L ${r*0.6} ${-r*0.85} L ${r*0.15} ${-r*0.55} Z`;
+        page.drawSvgPath(bow1, { x:cx, y:cy, color: ribbonColor });
+        page.drawSvgPath(bow2, { x:cx, y:cy, color: ribbonColor });
+        page.drawEllipse({ x:cx, y:cy+r*0.32, xScale:r*0.13, yScale:r*0.13, color: ribbonColor });
+      } else if (type === 'point') {
+        // рука вказівним пальцем (спрощена піктограма)
+        page.drawEllipse({ x:cx, y:cy-r*0.45, xScale:r*0.5, yScale:r*0.42, color });
+        drawRoundedRect(cx-r*0.16, cy-r*0.55, r*0.32, r*1.15, r*0.16, { color });
       }
     }
 
@@ -1247,11 +1240,11 @@ async function exportPdf() {
 
     /* ── Предмети, на яких можна навчатися (реальні фото, нова сторінка) ── */
     const teacherData = [
-      { b64: TEACHER_HISTORY_B64, label: 'історія України', color: pink },
+      { b64: TEACHER_HISTORY_B64, label: 'історія України', color: navy },
       { b64: TEACHER_ENGLISH_B64, label: 'англійська мова', color: navy },
-      { b64: TEACHER_UKRLIT_B64, label: 'українська мова та література', color: blue },
-      { b64: TEACHER_BIO_B64, label: 'біологія', color: orange },
-      { b64: TEACHER_MATH_B64, label: 'математика', color: green },
+      { b64: TEACHER_UKRLIT_B64, label: 'українська мова та література', color: navy },
+      { b64: TEACHER_BIO_B64, label: 'біологія', color: navy },
+      { b64: TEACHER_MATH_B64, label: 'математика', color: navy },
     ];
     const teacherImgs = [];
     for (const t of teacherData) {
@@ -1297,6 +1290,7 @@ async function exportPdf() {
           drawText(l, cx-textWidth(l,tLabelFont,true)/2, baseline, tLabelFont, { bold:true, color: t.color });
         });
       });
+
       y = rowTop - tImgH - 8 - tPillH - tRowGap;
     });
 
@@ -1409,7 +1403,7 @@ async function exportPdf() {
     function wrapRichText(segments, size, maxWidth) {
       let words = [];
       segments.forEach(seg => {
-        seg.text.split(' ').forEach(w => { if (w!=='') words.push({ text:w, bold:seg.bold }); });
+        seg.text.split(' ').forEach(w => { if (w!=='') words.push({ text:w, bold:seg.bold, color:seg.color }); });
       });
       const spaceW = font.widthOfTextAtSize(' ', size);
       let lines = [], cur = [], curW = 0;
@@ -1425,16 +1419,17 @@ async function exportPdf() {
       if (cur.length) lines.push(cur);
       return lines;
     }
-    function drawRichLine(line, x, yPos, size, color, quoteState) {
+    function drawRichLine(line, x, yPos, size, defaultColor, quoteState) {
       let xx = x;
       const spaceW = font.widthOfTextAtSize(' ', size);
       let i = 0;
       while (i < line.length) {
         let j = i;
         const runWords = [];
-        while (j < line.length && line[j].bold === line[i].bold) { runWords.push(line[j].text); j++; }
+        const runColor = line[i].color || defaultColor;
+        while (j < line.length && line[j].bold === line[i].bold && (line[j].color||defaultColor) === runColor) { runWords.push(line[j].text); j++; }
         const runText = runWords.join(' ');
-        drawText(runText, xx, yPos, size, { bold: line[i].bold, color, quoteState });
+        drawText(runText, xx, yPos, size, { bold: line[i].bold, color: runColor, quoteState });
         xx += textWidth(runText, size, line[i].bold);
         if (j < line.length) xx += spaceW;
         i = j;
@@ -1448,7 +1443,8 @@ async function exportPdf() {
     const infoLineH = 10, infoFontSize = 7.6;
     const infoSegments1 = [
       { text:'Вартість з урахуванням гранту за програмою "Доступна освіта":', bold:false },
-      { text:'-35% на перший предмет', bold:true },
+      { text:'-35%', bold:true, color: blue },
+      { text:'на перший предмет', bold:false },
     ];
     const infoSegments2 = [
       { text:'Вигідніше оплачувати одразу за весь курс', bold:false },
@@ -1513,33 +1509,28 @@ async function exportPdf() {
     const pillsTopMargin = (darkH - pillsBlockH) / 2;
     const pill1Top = y - pillsTopMargin;
     const pill2Top = pill1Top - pillH3 - pillGap;
+    const pill1BoldPart = '-5%';
+    const pill1RestPart = ' на другий та третій предмети';
+    const pill2BoldPart = 'безкоштовно';
+    const pill2RestPart = ' четвертий предмет';
     drawRoundedRect(pillsX, pill1Top-pillH3, pillsW, pillH3, 10, { color: white });
-    drawText(pill1Text, pillsX+11, pill1Top-pillH3+pillH3/2-pill1Size*0.35, pill1Size, { bold:true, color: navy });
+    const p1Y = pill1Top-pillH3+pillH3/2-pill1Size*0.35;
+    drawText(pill1BoldPart, pillsX+11, p1Y, pill1Size, { bold:true, color: orange });
+    drawText(pill1RestPart, pillsX+11+textWidth(pill1BoldPart,pill1Size,true), p1Y, pill1Size, { color: navy });
     drawRoundedRect(pillsX, pill2Top-pillH3, pillsW, pillH3, 10, { color: white });
-    drawText(pill2Text, pillsX+11, pill2Top-pillH3+pillH3/2-pill2Size*0.35, pill2Size, { bold:true, color: navy });
+    const p2Y = pill2Top-pillH3+pillH3/2-pill2Size*0.35;
+    drawText(pill2BoldPart, pillsX+11, p2Y, pill2Size, { bold:true, color: orange });
+    drawText(pill2RestPart, pillsX+11+textWidth(pill2BoldPart,pill2Size,true), p2Y, pill2Size, { color: navy });
     y -= darkH + 34;
 
-    /* ── Фінальний блок: кнопка запису + Instagram (по центру сторінки) ── */
-    ensureSpace(60);
-    const igUrl = 'https://www.instagram.com/onlyschool.ed/';
-    const ctaBtnText = 'ЗАПИСАТИСЯ НА КУРС';
-    const ctaBtnH = 36;
-    const ctaBtnW = textWidth(ctaBtnText, 10.5, true) + 44;
-    const igText = '@onlyschool.ed';
-    const igW = textWidth(igText, 10.5, true);
-    const ctaGroupGap = 18;
-    const ctaGroupW = ctaBtnW + ctaGroupGap + igW;
-    const ctaGroupX = margin + (pageW - 2*margin - ctaGroupW) / 2;
-
-    drawRoundedRect(ctaGroupX, y-ctaBtnH, ctaBtnW, ctaBtnH, 18, { color: blue });
-    drawText(ctaBtnText, ctaGroupX+22, y-ctaBtnH/2-3.7, 10.5, { bold:true, color: white });
-    addLinkAnnotation(page, ctaGroupX, y-ctaBtnH, ctaBtnW, ctaBtnH, igUrl);
-
-    const igX = ctaGroupX + ctaBtnW + ctaGroupGap;
-    const igCenterY = y - ctaBtnH/2;
-    drawText(igText, igX, igCenterY-3.7, 10.5, { bold:true, color: navy });
-    addLinkAnnotation(page, igX-4, igCenterY-9, igW+8, 18, igUrl);
-    y -= ctaBtnH + 10;
+    /* ── Як записатися на курс (текст, не кнопка) ── */
+    ensureSpace(30);
+    const enrollMsgLines = wrapText('Для запису на курс зверніться до менеджера, який реєстрував вас на консультацію', font, 10, pageW-2*margin-40);
+    enrollMsgLines.forEach(line => {
+      drawText(line, pageW/2-textWidth(line,10,true)/2, y, 10, { bold:true, color: navy });
+      y -= 14;
+    });
+    y -= 10;
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type:'application/pdf' });
